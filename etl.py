@@ -6,6 +6,16 @@ from sql_queries import *
 
 
 def process_song_file(cur, filepath):
+    """process load song file to postgres
+    
+    Args:
+        cur: psycopg2 cursor
+        filepath: path of song file
+        
+    Returns:
+        None
+        
+    """
     # open song file
     df = pd.read_json(filepath, lines=True)
 
@@ -20,6 +30,17 @@ def process_song_file(cur, filepath):
 
 
 def process_log_file(cur, filepath):
+    """process load log file to postgres
+    
+    Args:
+        cur: psycopg2 cursor
+        filepath: path of song file
+        
+    Returns:
+        None
+        
+    """
+        
     # open log file
     df = pd.read_json(filepath, lines=True)
 
@@ -68,10 +89,24 @@ def process_log_file(cur, filepath):
         # insert songplay record
         starttime = pd.to_datetime(row.ts,unit='ms')
         songplay_data = (index, starttime, row.userId, row.level, songid, artistid, row.sessionId, row.location, row.userAgent)
-        cur.execute(songplay_table_insert, songplay_data)
+        if songid is not None and (artistid is not None):
+            cur.execute(songplay_table_insert, songplay_data)
 
 
 def process_data(cur, conn, filepath, func):
+    """process all data in the filepath
+    
+    Args:
+        cur: psycopg2 cursor
+        conn: psycopg2 connection
+        filepath: path of root directory 
+        func: function for processing
+        
+    Returns:
+        None
+        
+    """
+        
     # get all files matching extension from directory
     all_files = []
     for root, dirs, files in os.walk(filepath):
@@ -91,6 +126,15 @@ def process_data(cur, conn, filepath, func):
 
 
 def main():
+    """main program
+    
+    Args:
+        None
+        
+    Returns:
+        None
+        
+    """
     conn = psycopg2.connect("host=127.0.0.1 dbname=sparkifydb user=student password=student")
     cur = conn.cursor()
 
